@@ -132,7 +132,17 @@ class PacmanService(private val webview: Webview) {
         } else {
             listOf("pacman", "-Ss", query)
         }
-        runQuery(id, cmd, ::parseSearchOutput)
+        // AUR search output doesn't include [installed] — cross-reference with pacman -Q.
+        if (source == "aur" && paruAvailable) {
+            val installedNames = CommandRunner.runCaptureSync(listOf("pacman", "-Q"))
+                .first.lines()
+                .filter { it.isNotBlank() }
+                .mapNotNull { it.split("\\s+".toRegex()).firstOrNull() }
+                .toSet()
+            runQuery(id, cmd) { parseSearchOutput(it, installedNames) }
+        } else {
+            runQuery(id, cmd) { parseSearchOutput(it) }
+        }
     }
 
     fun bindListInstalled(id: String, req: String) {
@@ -246,7 +256,7 @@ class PacmanService(private val webview: Webview) {
 
     // ---- output parsers ---------------------------------------------------
 
-    private fun parseSearchOutput(output: String): String {
+    private fun parseSearchOutput(output: String, installedNames: Set<String> = emptySet()): String {
         val entries = mutableListOf<PkgEntry>()
         val lines = output.lines()
         var i = 0
@@ -263,7 +273,7 @@ class PacmanService(private val webview: Webview) {
                 val repo = repoName.substring(0, slashIdx).trim()
                 val name = repoName.substring(slashIdx + 1).trim()
                 val version = parts.getOrElse(1) { "" }.trim()
-                val installed = trimmed.contains("[installed]")
+                val installed = trimmed.contains("[installed]") || installedNames.contains(name)
 
                 // Next non-empty line is the description.
                 var desc = ""

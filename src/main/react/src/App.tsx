@@ -287,7 +287,7 @@ function HeaderActions({ onSwitchTab, isDark, onToggleTheme }: { onSwitchTab: (t
 function SearchTab({ isDark, activeTab }: { isDark: boolean; activeTab: string }) {
   const { data: hasParu } = useParuCheck()
   const search = useSearch()
-  const { mutate: installPackage, isPending: isInstalling } = useInstallPackage()
+  const { mutate: installPackage, isPending: isInstalling, variables: installVars } = useInstallPackage()
   const containerRef = useRef<HTMLDivElement>(null)
   const containerHeight = useContainerHeight(
     containerRef,
@@ -297,11 +297,17 @@ function SearchTab({ isDark, activeTab }: { isDark: boolean; activeTab: string }
 
   const [query, setQuery] = useState('')
   const [source, setSource] = useState<'official' | 'aur'>('official')
+  const [results, setResults] = useState<PkgEntry[]>([])
 
   const doSearch = () => {
     if (!query.trim()) return
     search.mutate({ query: query.trim(), source })
   }
+
+  // Sync mutation results into local state so clear can reset instantly.
+  useEffect(() => {
+    if (search.data) setResults(search.data)
+  }, [search.data])
 
   const columns = useMemo(() => [
     { title: 'Repo',    dataIndex: 'repo',       key: 'repo',       width: 90,
@@ -316,7 +322,7 @@ function SearchTab({ isDark, activeTab }: { isDark: boolean; activeTab: string }
         <Button
           type="primary"
           disabled={record.installed}
-          loading={isInstalling}
+          loading={isInstalling && installVars?.name === record.name}
           onClick={() => { installPackage({ name: record.name, source }) }}
         >
           {record.installed ? 'Installed' : 'Install'}
@@ -337,7 +343,11 @@ function SearchTab({ isDark, activeTab }: { isDark: boolean; activeTab: string }
           loading={search.isPending}
           className="max-w-[520px]"
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => {
+            const v = e.target.value
+            setQuery(v)
+            if (!v.trim()) setResults([])
+          }}
           onSearch={doSearch}
         />
         <Select
@@ -352,7 +362,7 @@ function SearchTab({ isDark, activeTab }: { isDark: boolean; activeTab: string }
       </div>
       <div className="flex-1 overflow-hidden px-3 pb-3">
         <Table
-          dataSource={search.data ?? []}
+          dataSource={results}
           columns={columns}
           rowKey={(r) => `${r.repo}/${r.name}`}
           pagination={false}
@@ -371,7 +381,7 @@ function SearchTab({ isDark, activeTab }: { isDark: boolean; activeTab: string }
 
 function InstalledTab({ isDark, activeTab }: { isDark: boolean; activeTab: string }) {
   const { data: pkgs, isLoading, refetch } = useInstalledPackages()
-  const { mutate: removePackage, isPending: isRemoving } = useRemovePackage()
+  const { mutate: removePackage, isPending: isRemoving, variables: removeVars } = useRemovePackage()
   const tableAreaRef = useRef<HTMLDivElement>(null)
   const [filterText, setFilterText] = useState('')
   // Recalculate when this tab becomes active
@@ -396,7 +406,7 @@ function InstalledTab({ isDark, activeTab }: { isDark: boolean; activeTab: strin
         <Button
           danger
           icon={<DeleteOutlined />}
-          loading={isRemoving}
+          loading={isRemoving && removeVars === record.name}
           onClick={() => removePackage(record.name)}
         >
           Remove
