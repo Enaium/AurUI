@@ -1,0 +1,84 @@
+@import "tailwindcss";
+
+/* Theme CSS variables */
+:root {
+  --bg-primary: #1e1e2e;
+  --bg-secondary: #313244;
+  --bg-tertiary: #45475a;
+  --text-primary: #cdd6f4;
+  --text-secondary: #a6adc8;
+  --accent: #89b4fa;
+  --green: #a6e3a1;
+  --red: #f38ba8;
+  --yellow: #f9e2af;
+  --border-color: #45475a;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f5f5f5;
+    --bg-tertiary: #d9d9d9;
+    --text-primary: #262626;
+    --text-secondary: #8c8c8c;
+    --accent: #1677ff;
+    --green: #52c41a;
+    --red: #ff4d4f;
+    --yellow: #faad14;
+    --border-color: #d9d9d9;
+  }
+}
+
+/* Base styles */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.2s, color 0.2s;
+}
+
+#root {
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Keep tab panes in a stable flex-sized viewport for fixed-height tables. */
+.ant-tabs.h-full {
+  display: flex;
+  flex-direction: column;
+}
+
+.ant-tabs.h-full > .ant-tabs-content-holder {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.aur-tabs-body,
+.aur-tabs-content {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bg-tertiary);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
