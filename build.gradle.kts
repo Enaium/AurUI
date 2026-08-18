@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "cn.enaium"
-version = "1.0-SNAPSHOT"
+version = "1.0.0"
 
 kotlin {
     linuxX64 {

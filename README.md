@@ -2,6 +2,8 @@
 
 A graphical package manager for Arch Linux, built with Kotlin Multiplatform and React.
 
+![](https://img.cdn1.vip/i/6a83f3557fd5f_1787032405.webp)
+
 ## Features
 
 - **Package Search** — Search official repos and AUR with paru
